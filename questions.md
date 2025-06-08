@@ -1265,7 +1265,7 @@ ip addr add 192.168.1.100/24 dev eth0  # добавить IP адрес
 ping google.com                       # проверить доступность хоста
 ping6 google.com                      # ping через IPv6
 traceroute google.com                 # трассировка маршрута
-mtr google.com                        # комбинация ping и traceroute
+mtr google.com                        # интерактивная трассировка
 ```
 
 **Сетевые протоколы:**
@@ -1482,6 +1482,245 @@ rpm -ivh package.rpm                  # установка RPM пакета
 pacman -S package_name                # установка
 pacman -R package_name                # удаление
 pacman -Ss keyword                    # поиск
+```
+
+---
+
+### 45. Управление пакетами в различных дистрибутивах {#45-управление-пакетами-в-различных-дистрибутивах}
+
+**Debian/Ubuntu (APT):**
+```bash
+# Основные команды APT
+apt update                            # обновить список пакетов
+apt upgrade                           # обновить установленные пакеты
+apt install package_name              # установить пакет
+apt remove package_name               # удалить пакет (оставить конфигурации)
+apt purge package_name                # полностью удалить пакет
+apt autoremove                        # удалить неиспользуемые зависимости
+
+# Поиск и информация
+apt search keyword                    # поиск пакетов
+apt show package_name                 # информация о пакете
+apt list --installed                  # список установленных пакетов
+apt list --upgradable                 # список пакетов для обновления
+
+# Работа с репозиториями
+/etc/apt/sources.list                 # основной файл репозиториев
+/etc/apt/sources.list.d/              # дополнительные репозитории
+apt-key add keyfile                   # добавить GPG ключ репозитория
+add-apt-repository ppa:user/repo      # добавить PPA репозиторий
+```
+
+**Red Hat/CentOS/Fedora:**
+```bash
+# YUM (RHEL/CentOS 7 и старше)
+yum update                            # обновить систему
+yum install package_name              # установить пакет
+yum remove package_name               # удалить пакет
+yum search keyword                    # поиск пакетов
+yum info package_name                 # информация о пакете
+yum list installed                    # установленные пакеты
+
+# DNF (Fedora, RHEL/CentOS 8+)
+dnf update                            # обновить систему
+dnf install package_name              # установить пакет
+dnf remove package_name               # удалить пакет
+dnf search keyword                    # поиск пакетов
+dnf info package_name                 # информация о пакете
+dnf history                           # история операций
+
+# RPM - низкоуровневый менеджер
+rpm -ivh package.rpm                  # установить RPM пакет
+rpm -qa                               # список установленных пакетов
+rpm -qi package_name                  # информация о пакете
+rpm -ql package_name                  # список файлов пакета
+rpm -e package_name                   # удалить пакет
+```
+
+**Arch Linux (Pacman):**
+```bash
+# Основные операции
+pacman -Syu                           # обновить систему
+pacman -S package_name                # установить пакет
+pacman -R package_name                # удалить пакет
+pacman -Rs package_name               # удалить пакет с зависимостями
+pacman -Ss keyword                    # поиск пакетов
+pacman -Si package_name               # информация о пакете
+pacman -Q                             # список установленных пакетов
+pacman -Qe                            # явно установленные пакеты
+
+# AUR (Arch User Repository)
+git clone https://aur.archlinux.org/package_name.git
+cd package_name
+makepkg -si                           # собрать и установить из AUR
+```
+
+---
+
+### 46. Сборка ПО из исходных кодов {#46-сборка-по-из-исходных-кодов}
+
+**Типичный процесс сборки (autotools):**
+```bash
+# Стандартная последовательность
+./configure                           # конфигурация сборки
+make                                  # компиляция
+make install                          # установка (требует root)
+
+# С параметрами
+./configure --prefix=/usr/local       # установка в /usr/local
+./configure --help                    # список всех опций
+make -j$(nproc)                       # многопоточная сборка
+make DESTDIR=/tmp/install install     # установка в альтернативную директорию
+```
+
+**CMake - современная система сборки:**
+```bash
+# Сборка с CMake
+mkdir build && cd build               # создать директорию сборки
+cmake ..                              # конфигурация
+cmake -DCMAKE_BUILD_TYPE=Release ..   # релизная сборка
+make -j$(nproc)                       # компиляция
+make install                          # установка
+
+# Альтернативный способ
+cmake --build .                       # универсальная команда сборки
+cmake --install .                     # универсальная команда установки
+```
+
+**Управление зависимостями:**
+```bash
+# Debian/Ubuntu - установка build-essential
+apt install build-essential           # GCC, make, libc6-dev
+apt build-dep package_name            # зависимости для сборки пакета
+
+# RHEL/CentOS/Fedora
+yum groupinstall "Development Tools"  # основные инструменты разработки
+dnf builddep package_name             # зависимости для сборки
+
+# Arch Linux
+pacman -S base-devel                  # основные инструменты разработки
+```
+
+**Создание пакетов из исходников:**
+```bash
+# Debian - создание .deb пакета
+apt install debhelper dh-make         # инструменты создания пакетов
+dh_make --createorig                  # создать структуру пакета
+dpkg-buildpackage -us -uc             # собрать пакет
+
+# RPM - создание .rpm пакета  
+yum install rpm-build rpmdevtools     # инструменты RPM
+rpmdev-setuptree                      # создать структуру
+rpmbuild -ba package.spec             # собрать пакет
+
+# Arch - создание пакета
+makepkg                               # собрать пакет из PKGBUILD
+makepkg -si                           # собрать и установить
+```
+
+**checkinstall - альтернатива make install:**
+```bash
+# Установка checkinstall
+apt install checkinstall              # Debian/Ubuntu
+yum install checkinstall              # RHEL/CentOS
+
+# Использование вместо make install
+sudo checkinstall                     # создаст пакет и установит
+sudo checkinstall --pkgname=myapp --pkgversion=1.0  # с параметрами
+```
+
+---
+
+### 47. Управление службами и автозапуск {#47-управление-службами-и-автозапуск}
+
+**Systemd - современный init система:**
+```bash
+# Управление службами
+systemctl start service_name          # запустить службу
+systemctl stop service_name           # остановить службу
+systemctl restart service_name        # перезапустить службу
+systemctl reload service_name         # перезагрузить конфигурацию
+systemctl status service_name         # статус службы
+
+# Автозапуск служб
+systemctl enable service_name         # включить автозапуск
+systemctl disable service_name        # отключить автозапуск
+systemctl is-enabled service_name     # проверить статус автозапуска
+
+# Информация о службах
+systemctl list-units --type=service   # список всех служб
+systemctl list-units --failed         # службы с ошибками
+systemctl list-unit-files --type=service  # все unit файлы служб
+```
+
+**Создание собственной службы:**
+```bash
+# Файл службы: /etc/systemd/system/myapp.service
+[Unit]
+Description=My Application
+After=network.target
+
+[Service]
+Type=simple
+User=myuser
+WorkingDirectory=/opt/myapp
+ExecStart=/opt/myapp/myapp
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+# Активация службы
+systemctl daemon-reload               # перезагрузить конфигурацию systemd
+systemctl enable myapp.service        # включить автозапуск  
+systemctl start myapp.service         # запустить службу
+```
+
+**Журналы systemd (journald):**
+```bash
+# Просмотр логов
+journalctl                            # все логи
+journalctl -u service_name            # логи конкретной службы
+journalctl -f                         # следить за логами в реальном времени
+journalctl --since "2023-01-01"       # логи с определённой даты
+journalctl --until "1 hour ago"       # логи до определённого времени
+journalctl -p err                     # только ошибки
+journalctl --disk-usage               # использование места на диске
+```
+
+**SysV Init (устаревшая система):**
+```bash
+# Управление службами в старых системах
+service service_name start            # запустить службу
+service service_name stop             # остановить службу
+service service_name status           # статус службы
+
+# Управление автозапуском
+chkconfig service_name on             # включить автозапуск
+chkconfig service_name off            # отключить автозапуск
+chkconfig --list                      # список служб и их статус
+
+# Уровни запуска (runlevels)
+runlevel                              # текущий уровень запуска
+init 3                                # перейти на уровень 3 (многопользовательский)
+init 6                                # перезагрузка
+```
+
+**Управление целями systemd (targets):**
+```bash
+# Аналоги runlevels в systemd
+systemctl get-default                 # текущая цель по умолчанию
+systemctl set-default multi-user.target  # установить цель по умолчанию
+systemctl isolate rescue.target      # перейти в режим восстановления
+systemctl isolate multi-user.target  # многопользовательский режим
+
+# Основные цели systemd
+poweroff.target                       # выключение (runlevel 0)
+rescue.target                         # однопользовательский режим (runlevel 1)
+multi-user.target                     # многопользовательский режим (runlevel 3)
+graphical.target                      # графический режим (runlevel 5)
+reboot.target                         # перезагрузка (runlevel 6)
 ```
 
 ---
@@ -3800,6 +4039,256 @@ services:
 
 ---
 
+### 72. Веб-сервер Apache {#72-веб-сервер-apache}
+
+**Apache HTTP Server** - один из самых популярных веб-серверов в мире.
+
+**Установка и базовая настройка:**
+```bash
+# Установка Apache
+apt install apache2                   # Debian/Ubuntu
+yum install httpd                     # RHEL/CentOS
+systemctl start apache2              # запуск службы
+systemctl enable apache2             # автозапуск
+
+# Основные файлы конфигурации
+/etc/apache2/apache2.conf             # основная конфигурация (Debian/Ubuntu)
+/etc/httpd/conf/httpd.conf            # основная конфигурация (RHEL/CentOS)
+/etc/apache2/sites-available/         # доступные виртуальные хосты
+/etc/apache2/sites-enabled/           # активные виртуальные хосты
+```
+
+**Виртуальные хосты:**
+```apache
+# /etc/apache2/sites-available/example.com.conf
+<VirtualHost *:80>
+    ServerName example.com
+    ServerAlias www.example.com
+    DocumentRoot /var/www/example.com
+    
+    ErrorLog ${APACHE_LOG_DIR}/example.com_error.log
+    CustomLog ${APACHE_LOG_DIR}/example.com_access.log combined
+    
+    <Directory /var/www/example.com>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+# SSL виртуальный хост
+<VirtualHost *:443>
+    ServerName example.com
+    DocumentRoot /var/www/example.com
+    
+    SSLEngine on
+    SSLCertificateFile /path/to/cert.pem
+    SSLCertificateKeyFile /path/to/private.key
+</VirtualHost>
+```
+
+**Управление виртуальными хостами:**
+```bash
+# Активация и деактивация сайтов (Debian/Ubuntu)
+a2ensite example.com                  # активировать сайт
+a2dissite example.com                 # деактивировать сайт
+systemctl reload apache2             # применить изменения
+
+# Управление модулями
+a2enmod ssl                           # включить SSL модуль
+a2enmod rewrite                       # включить mod_rewrite
+a2dismod autoindex                    # отключить автоиндекс
+```
+
+**Основные модули Apache:**
+```bash
+# mod_rewrite - перезапись URL
+LoadModule rewrite_module modules/mod_rewrite.so
+
+# mod_ssl - поддержка HTTPS
+LoadModule ssl_module modules/mod_ssl.so
+
+# mod_php - поддержка PHP
+LoadModule php_module modules/libphp.so
+```
+
+**Настройка производительности:**
+```apache
+# Настройка MPM (Multi-Processing Module)
+<IfModule mpm_prefork_module>
+    StartServers 8
+    MinSpareServers 5
+    MaxSpareServers 20
+    ServerLimit 256
+    MaxRequestWorkers 256
+    MaxConnectionsPerChild 10000
+</IfModule>
+
+# Сжатие контента
+LoadModule deflate_module modules/mod_deflate.so
+<Location />
+    SetOutputFilter DEFLATE
+    SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png)$ no-gzip dont-vary
+</Location>
+```
+
+---
+
+### 73. Веб-сервер Nginx {#73-веб-сервер-nginx}
+
+**Nginx** - высокопроизводительный веб-сервер и обратный прокси.
+
+**Установка и настройка:**
+```bash
+# Установка Nginx
+apt install nginx                     # Debian/Ubuntu
+yum install nginx                     # RHEL/CentOS
+systemctl start nginx                # запуск службы
+systemctl enable nginx               # автозапуск
+
+# Основные файлы конфигурации
+/etc/nginx/nginx.conf                 # основная конфигурация
+/etc/nginx/sites-available/           # доступные сайты
+/etc/nginx/sites-enabled/             # активные сайты
+/etc/nginx/conf.d/                    # дополнительная конфигурация
+```
+
+**Структура конфигурации:**
+```nginx
+# /etc/nginx/nginx.conf
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+
+events {
+    worker_connections 1024;
+    use epoll;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    
+    sendfile on;
+    tcp_nopush on;
+    keepalive_timeout 65;
+    
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}
+```
+
+**Конфигурация виртуального хоста:**
+```nginx
+# /etc/nginx/sites-available/example.com
+server {
+    listen 80;
+    server_name example.com www.example.com;
+    root /var/www/example.com;
+    index index.html index.php;
+    
+    # Логи
+    access_log /var/log/nginx/example.com.access.log;
+    error_log /var/log/nginx/example.com.error.log;
+    
+    # Обработка статических файлов
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # Обработка PHP
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+    
+    # Безопасность
+    location ~ /\.ht {
+        deny all;
+    }
+}
+
+# SSL конфигурация
+server {
+    listen 443 ssl http2;
+    server_name example.com;
+    
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/private.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256;
+    
+    # HSTS
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+}
+```
+
+**Nginx как обратный прокси:**
+```nginx
+# Проксирование к backend серверу
+upstream backend {
+    server 127.0.0.1:8000;
+    server 127.0.0.1:8001;
+    server 127.0.0.1:8002;
+}
+
+server {
+    listen 80;
+    server_name api.example.com;
+    
+    location / {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+**Управление сайтами:**
+```bash
+# Активация сайта (Debian/Ubuntu)
+ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/
+nginx -t                              # проверить конфигурацию
+systemctl reload nginx               # применить изменения
+
+# Деактивация сайта
+rm /etc/nginx/sites-enabled/example.com
+systemctl reload nginx
+```
+
+**Настройка производительности:**
+```nginx
+# Оптимизация worker процессов
+worker_processes auto;               # автоматически по числу CPU
+worker_rlimit_nofile 65535;         # лимит открытых файлов
+
+events {
+    worker_connections 4096;         # соединений на worker
+    use epoll;                       # эффективный метод событий
+    multi_accept on;                 # принимать несколько соединений
+}
+
+# Буферизация и кэширование
+client_body_buffer_size 128k;
+client_max_body_size 50m;
+proxy_buffering on;
+proxy_buffer_size 4k;
+proxy_buffers 8 4k;
+
+# Сжатие
+gzip on;
+gzip_vary on;
+gzip_min_length 1024;
+gzip_types text/plain text/css application/json application/javascript;
+```
+
+---
+
 ### 74. Протокол WSGI {#74-протокол-wsgi}
 
 **WSGI (Web Server Gateway Interface)** - стандарт взаимодействия между веб-серверами и Python веб-приложениями.
@@ -3968,3 +4457,539 @@ gunicorn app:application \
 gunicorn app:application \
     --workers 4 \
     --threads 2 \
+```
+
+---
+
+### 77. Асинхронная обработка запросов {#77-асинхронная-обработка-запросов}
+
+**Асинхронная модель:**
+- Неблокирующие операции I/O
+- Event Loop для обработки событий
+- Высокая производительность при большом количестве соединений
+
+**Python ASGI (Asynchronous Server Gateway Interface):**
+```python
+# async_app.py
+import asyncio
+import time
+
+async def application(scope, receive, send):
+    if scope['type'] == 'http':
+        # Неблокирующая операция
+        await asyncio.sleep(2)  # имитация I/O операции
+        
+        await send({
+            'type': 'http.response.start',
+            'status': 200,
+            'headers': [[b'content-type', b'text/plain']],
+        })
+        
+        await send({
+            'type': 'http.response.body',
+            'body': b'Async response after 2 seconds',
+        })
+```
+
+**FastAPI - современный async фреймворк:**
+```python
+from fastapi import FastAPI
+import asyncio
+import httpx
+
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return {"message": "FastAPI Async App"}
+
+@app.get("/slow")
+async def slow_endpoint():
+    # Неблокирующая задержка
+    await asyncio.sleep(2)
+    return {"message": "Response after 2 seconds"}
+
+@app.get("/external")
+async def external_api():
+    # Асинхронный HTTP запрос
+    async with httpx.AsyncClient() as client:
+        response = await client.get("https://api.github.com/users/octocat")
+        return response.json()
+```
+
+**ASGI серверы:**
+```bash
+# Uvicorn - быстрый ASGI сервер
+pip install uvicorn
+uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4
+
+# Hypercorn - альтернативный ASGI сервер
+pip install hypercorn
+hypercorn app:app --bind 0.0.0.0:8000 --workers 4
+
+# Daphne - ASGI сервер от Django
+pip install daphne
+daphne -b 0.0.0.0 -p 8000 app:app
+```
+
+**Производительность async vs sync:**
+```python
+# Сравнение производительности
+import asyncio
+import time
+import httpx
+import requests
+
+# Синхронный код
+def sync_requests():
+    start = time.time()
+    for i in range(100):
+        requests.get("https://httpbin.org/delay/1")
+    print(f"Sync: {time.time() - start:.2f} seconds")
+
+# Асинхронный код
+async def async_request(client, url):
+    response = await client.get(url)
+    return response
+
+async def async_requests():
+    start = time.time()
+    async with httpx.AsyncClient() as client:
+        tasks = [async_request(client, "https://httpbin.org/delay/1") for _ in range(100)]
+        await asyncio.gather(*tasks)
+    print(f"Async: {time.time() - start:.2f} seconds")
+
+# Результат: async ~1-2 секунды, sync ~100 секунд
+```
+
+---
+
+### 78. Мониторинг производительности веб-приложений {#78-мониторинг-производительности-веб-приложений}
+
+**Основные метрики производительности:**
+- **Пропускная способность** (RPS - Requests Per Second)
+- **Время отклика** (Response Time)
+- **Использование ресурсов** (CPU, RAM, I/O)
+- **Количество ошибок** (Error Rate)
+
+**Инструменты нагрузочного тестирования:**
+
+**1. Apache Bench (ab):**
+```bash
+# Простое тестирование
+ab -n 1000 -c 10 http://localhost:8000/    # 1000 запросов, 10 одновременно
+ab -t 60 -c 10 http://localhost:8000/      # тест в течение 60 секунд
+ab -n 1000 -c 10 -H "Authorization: Bearer token" http://localhost:8000/api/
+
+# Результат показывает RPS, время отклика, распределение времени
+```
+
+**2. wrk - современная альтернатива ab:**
+```bash
+# Установка
+apt install wrk                        # Debian/Ubuntu
+yum install wrk                        # RHEL/CentOS
+
+# Базовое тестирование
+wrk -t4 -c100 -d30s http://localhost:8000/  # 4 потока, 100 соединений, 30 секунд
+wrk --script=script.lua -t4 -c100 -d30s http://localhost:8000/
+
+# Lua скрипт для wrk
+-- script.lua
+wrk.method = "POST"
+wrk.body   = '{"name": "test"}'
+wrk.headers["Content-Type"] = "application/json"
+```
+
+**3. Artillery.js - современный инструмент:**
+```bash
+# Установка
+npm install -g artillery
+
+# Конфигурация (artillery.yml)
+config:
+  target: 'http://localhost:8000'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+scenarios:
+  - name: "API test"
+    requests:
+      - get:
+          url: "/api/users"
+
+# Запуск теста
+artillery run artillery.yml
+```
+
+**Мониторинг в production:**
+
+**1. Prometheus + Grafana:**
+```yaml
+# docker-compose.yml для мониторинга
+version: '3.8'
+services:
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+```
+
+**2. Application Performance Monitoring (APM):**
+```python
+# Добавление метрик в FastAPI
+from prometheus_client import Counter, Histogram, generate_latest
+import time
+
+REQUEST_COUNT = Counter('requests_total', 'Total requests', ['method', 'endpoint'])
+REQUEST_LATENCY = Histogram('request_duration_seconds', 'Request latency')
+
+@app.middleware("http")
+async def metrics_middleware(request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=request.url.path
+    ).inc()
+    
+    REQUEST_LATENCY.observe(time.time() - start_time)
+    return response
+
+@app.get("/metrics")
+async def metrics():
+    return Response(generate_latest(), media_type="text/plain")
+```
+
+**3. Логирование производительности:**
+```python
+import logging
+import time
+from functools import wraps
+
+# Декоратор для измерения времени выполнения
+def measure_time(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        start = time.time()
+        result = await func(*args, **kwargs)
+        end = time.time()
+        
+        logging.info(f"{func.__name__} took {end - start:.4f} seconds")
+        return result
+    return wrapper
+
+@measure_time
+async def slow_function():
+    await asyncio.sleep(1)
+    return "result"
+```
+
+---
+
+### 79. Оптимизация производительности {#79-оптимизация-производительности}
+
+**Уровни оптимизации:**
+
+**1. Оптимизация кода:**
+```python
+# Плохо - N+1 запросов
+async def get_users_with_posts():
+    users = await get_all_users()
+    for user in users:
+        user.posts = await get_posts_by_user_id(user.id)
+    return users
+
+# Хорошо - один запрос
+async def get_users_with_posts_optimized():
+    return await get_users_with_posts_join()
+
+# Кэширование результатов
+from functools import lru_cache
+import redis
+
+redis_client = redis.Redis(host='localhost', port=6379, db=0)
+
+@lru_cache(maxsize=128)
+def expensive_computation(param):
+    # Тяжёлые вычисления
+    time.sleep(2)
+    return f"result for {param}"
+
+async def cached_api_call(key):
+    # Проверка кэша Redis
+    cached_result = redis_client.get(key)
+    if cached_result:
+        return json.loads(cached_result)
+    
+    # Если нет в кэше - вычисляем
+    result = await expensive_api_call()
+    redis_client.setex(key, 300, json.dumps(result))  # TTL 5 минут
+    return result
+```
+
+**2. Оптимизация базы данных:**
+```sql
+-- Создание индексов
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_posts_user_id ON posts(user_id);
+CREATE INDEX idx_posts_created_at ON posts(created_at);
+
+-- Составные индексы
+CREATE INDEX idx_posts_user_status ON posts(user_id, status);
+
+-- Анализ медленных запросов
+EXPLAIN ANALYZE SELECT * FROM posts WHERE user_id = 123;
+
+-- Оптимизация запросов
+-- Плохо
+SELECT * FROM posts WHERE YEAR(created_at) = 2023;
+
+-- Хорошо
+SELECT * FROM posts WHERE created_at >= '2023-01-01' AND created_at < '2024-01-01';
+```
+
+**3. Оптимизация сервера:**
+```nginx
+# Nginx оптимизация
+worker_processes auto;
+worker_rlimit_nofile 65535;
+
+events {
+    worker_connections 4096;
+    use epoll;
+    multi_accept on;
+}
+
+http {
+    # Кэширование статики
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # Сжатие
+    gzip on;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css application/javascript;
+    
+    # Кэширование proxy
+    proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=my_cache:10m;
+    proxy_cache my_cache;
+    proxy_cache_valid 200 60m;
+}
+```
+
+**4. Горизонтальное масштабирование:**
+```yaml
+# docker-compose.yml - несколько инстансов приложения
+version: '3.8'
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    depends_on:
+      - app1
+      - app2
+      - app3
+      
+  app1:
+    image: myapp:latest
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/myapp
+      
+  app2:
+    image: myapp:latest
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/myapp
+      
+  app3:
+    image: myapp:latest
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/myapp
+      
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_PASSWORD: password
+      
+  redis:
+    image: redis:alpine
+```
+
+**5. CDN и кэширование:**
+```python
+# HTTP заголовки для кэширования
+from fastapi import FastAPI, Response
+
+@app.get("/api/data")
+async def get_data(response: Response):
+    response.headers["Cache-Control"] = "public, max-age=3600"  # 1 час
+    response.headers["ETag"] = '"abc123"'
+    return {"data": "cached content"}
+
+# Условные запросы
+@app.get("/api/conditional")
+async def conditional_response(if_none_match: str = None):
+    current_etag = "abc123"
+    if if_none_match == current_etag:
+        return Response(status_code=304)  # Not Modified
+    
+    response.headers["ETag"] = current_etag
+    return {"data": "content"}
+```
+
+---
+
+### 80. Linux kernel: модули, системные вызовы {#80-linux-kernel-модули-системные-вызовы}
+
+**Архитектура ядра Linux:**
+- **Monolithic kernel** - все компоненты в одном адресном пространстве
+- **Loadable kernel modules** - динамическая загрузка модулей
+- **User space** / **Kernel space** - разделение привилегий
+
+**Управление модулями ядра:**
+```bash
+# Просмотр загруженных модулей
+lsmod                                 # список модулей
+lsmod | grep usb                      # модули USB
+
+# Информация о модуле
+modinfo module_name                   # информация о модуле
+modinfo e1000e                        # информация о сетевом драйвере
+
+# Загрузка и выгрузка модулей
+modprobe module_name                  # загрузить модуль с зависимостями
+insmod /path/to/module.ko             # загрузить конкретный файл модуля
+rmmod module_name                     # выгрузить модуль
+modprobe -r module_name               # выгрузить модуль с зависимостями
+
+# Постоянная конфигурация модулей
+/etc/modules                          # модули для автозагрузки
+/etc/modprobe.d/                      # конфигурация modprobe
+/etc/modprobe.d/blacklist.conf        # заблокированные модули
+```
+
+**Пример конфигурации модулей:**
+```bash
+# /etc/modules - автозагрузка модулей
+loop
+nbd
+dm-crypt
+
+# /etc/modprobe.d/custom.conf - параметры модулей
+options snd-hda-intel enable_msi=1
+alias net-pf-10 off
+blacklist nouveau
+
+# Временная блокировка модуля
+echo "blacklist nouveau" > /etc/modprobe.d/blacklist-nouveau.conf
+update-initramfs -u
+```
+
+**Системные вызовы (System Calls):**
+```c
+// Пример системных вызовов в C
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+int main() {
+    // open() - системный вызов для открытия файла
+    int fd = open("/tmp/test.txt", O_CREAT | O_WRONLY, 0644);
+    
+    // write() - запись в файл
+    write(fd, "Hello World\n", 12);
+    
+    // close() - закрытие файла
+    close(fd);
+    
+    return 0;
+}
+```
+
+**Мониторинг системных вызовов:**
+```bash
+# strace - трассировка системных вызовов
+strace ls /tmp                        # системные вызовы команды ls
+strace -p PID                         # трассировка процесса
+strace -e trace=open,read,write command  # только определённые вызовы
+strace -c command                     # статистика вызовов
+strace -f command                     # включая дочерние процессы
+
+# Пример вывода strace
+execve("/bin/ls", ["ls", "/tmp"], 0x7ffe...) = 0
+brk(NULL)                             = 0x55f8b1234000
+openat(AT_FDCWD, "/tmp", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3
+```
+
+**Информация о ядре:**
+```bash
+# Версия и информация о ядре
+uname -r                              # версия ядра
+uname -a                              # полная информация
+cat /proc/version                     # детальная информация о ядре
+
+# Параметры ядра
+cat /proc/cmdline                     # параметры загрузки ядра
+sysctl -a                             # все параметры ядра
+sysctl kernel.hostname                # конкретный параметр
+sysctl -w net.ipv4.ip_forward=1       # изменить параметр
+
+# Постоянные изменения параметров
+echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+sysctl -p                             # применить изменения
+```
+
+**Виртуальная файловая система /proc:**
+```bash
+# Информация о процессах и системе
+cat /proc/cpuinfo                     # информация о CPU
+cat /proc/meminfo                     # информация о памяти
+cat /proc/mounts                      # смонтированные файловые системы
+cat /proc/interrupts                  # информация о прерываниях
+cat /proc/modules                     # загруженные модули
+
+# Информация о конкретном процессе
+cat /proc/PID/status                  # статус процесса
+cat /proc/PID/cmdline                 # командная строка процесса
+cat /proc/PID/environ                 # переменные окружения
+ls -l /proc/PID/fd/                   # открытые файлы процесса
+```
+
+---
+
+### 81. Производительность системы и оптимизация {#81-производительность-системы-и-оптимизация}
+
+**Мониторинг производительности системы:**
+
+**1. Мониторинг CPU:**
+```bash
+# top и htop - интерактивный мониторинг
+top                                   # классический мониторинг
+htop                                  # улучшенная версия с цветами
+top -p PID                            # мониторинг конкретного процесса
+
+# vmstat - статистика виртуальной памяти
+vmstat 1                              # обновление каждую секунду
+vmstat 1 10                           # 10 итераций с интервалом 1 сек
+
+# iostat - статистика I/O
+iostat -x 1                           # детальная статистика I/O
+iostat -c 1                           # только CPU статистика
+
+# sar - системный мониторинг
+sar -u 1 10                           # CPU utilization
+### 🔄 Загрузка, Процессы, Системное администрирование
